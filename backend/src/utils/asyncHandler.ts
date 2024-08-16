@@ -1,12 +1,14 @@
 import { NextFunction, Request, Response } from "express";
+import { CustomRequest } from "../types/authHelper.type";
 
-type AsyncHandler = (
-  req: Request,
+type AsyncFunction = (
+  req: CustomRequest,
   res: Response,
   next: NextFunction
 ) => Promise<any>;
 
 export const asyncHandler =
-  (func: AsyncHandler) => (req: Request, res: Response, next: NextFunction) => {
+  (func: AsyncFunction) =>
+  (req: CustomRequest, res: Response, next: NextFunction) => {
     return Promise.resolve(func(req, res, next)).catch(next);
   };
