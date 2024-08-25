@@ -1,4 +1,4 @@
-import { eq } from "drizzle-orm";
+import { eq, ilike } from "drizzle-orm";
 import { db } from "../db";
 import { users, UserInsert } from "../db/schema/user.schema";
 
@@ -31,3 +31,15 @@ export const getUserById = async (id: any) => {
     .where(eq(users.id, id));
   return response[0];
 };
+
+// export const searchUsersByUsername = async (username: string) => {
+//   const response = await db
+//     .select({
+//       id: users.id,
+//       username: users.username,
+//     })
+//     .from(users)
+//     .where(ilike(users.username, `%${username}%`));
+
+//   return response;
+// };

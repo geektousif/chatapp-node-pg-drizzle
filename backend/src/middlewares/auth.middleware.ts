@@ -4,6 +4,8 @@ import { CustomPayload } from "../types/authHelper.type";
 import { NotFoundError, UnauthorizedError } from "../utils/errors";
 import { verifyJWTToken } from "../utils/helpers";
 import { getUserById } from "../repositories/user.repository";
+import cookieParser from "cookie-parser";
+import { SocketWithUser } from "../types/socketWithUser";
 
 const authMiddleware = asyncHandler(async (req, res, next) => {
   try {
@@ -53,3 +55,29 @@ const authMiddleware = asyncHandler(async (req, res, next) => {
 });
 
 export default authMiddleware;
+
+export const socketAuth = async (socket: SocketWithUser, next: any) => {
+  const token = socket.handshake.headers.cookie
+    ? socket.handshake.headers.cookie.split("token=")[1]
+    : null;
+
+  if (token) {
+    let decoded: CustomPayload;
+
+    decoded = (await verifyJWTToken(token)) as CustomPayload;
+
+    if (!decoded) {
+      next(new Error("Please Login"));
+    }
+
+    const { password, ...user } = await getUserById(decoded.id!);
+
+    if (!user) {
+      next(new Error("Please Login"));
+    }
+    socket.user = user;
+    next();
+  } else {
+    next(new Error("Authentication error"));
+  }
+};
